@@ -1,0 +1,3041 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TWS數據查詢</title>
+    <!-- 引入 Plotly.js -->
+    <script type="text/javascript" src="https://gc.kes.v2.scr.kaspersky-labs.com/7EA5E9BB-55E1-4C31-9C21-4943DDFED2E4/main.js?attr=dYFWTq6PRinDl7QNWA-HboMI0Z9mWfPhZtZO2rJrXaHzeIjiLHN4WZpDYj7bBaIr" charset="UTF-8"></script><script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <!-- 引入 Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: left;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .table {
+            margin-top: 20px;
+        }
+        .btn-primary {
+            width: auto;
+            padding: 8px 16px;
+            font-size: 14px;
+            margin-bottom: 10px;
+            margin-right: 10px;
+        }
+        .btn-kdj {
+            width: auto;
+            padding: 8px 16px;
+            font-size: 14px;
+            background-color: yellow;
+            border: 1px solid #ced4da;
+            margin-bottom: 10px;
+            margin-right: 10px;
+        }
+        .btn-kline {
+            width: auto;
+            padding: 8px 16px;
+            font-size: 14px;
+            background-color: #28a745;
+            color: white;
+            border: 1px solid #ced4da;
+            margin-bottom: 10px;
+            margin-right: 10px;
+        }
+        .btn-trend {
+            width: auto;
+            padding: 8px 16px;
+            font-size: 14px;
+            background-color: #ff4500;
+            color: white;
+            border: 1px solid #ced4da;
+            margin-bottom: 10px;
+            margin-right: 10px;
+        }
+        .btn-cnyes {
+            width: auto;
+            padding: 8px 16px;
+            font-size: 14px;
+            background-color: #add8e6;
+            border: 1px solid #ced4da;
+            margin-bottom: 10px;
+            margin-right: 10px;
+        }
+        .btn-kdj:active,
+        .btn-kdj:focus {
+            background-color: #ffcc00;
+            color: black;
+        }
+        .btn-cnyes:active,
+        .btn-cnyes:focus {
+            background-color: #87ceeb;
+            color: black;
+        }
+        .alert {
+            margin-top: 20px;
+        }
+        .quick-stock-buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .quick-stock-buttons button {
+            padding: 10px;
+            font-size: 14px;
+            background-color: #e9ecef;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+        .quick-stock-buttons button:hover {
+            background-color: #dee2e6;
+        }
+        .custom-stock-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .custom-stock-input input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+        }
+        .custom-stock-input button {
+            padding: 8px 16px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .custom-stock-input button:hover {
+            background-color: #218838;
+        }
+        .button-spacer {
+            width: 10px;
+        }
+        .stock-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        #chart-container {
+            width: 100%;
+            height: 600px;
+            margin: 20px 0;
+            display: none;
+            position: relative;
+        }
+        .close-chart-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .close-chart-btn:hover {
+            background-color: #c82333;
+        }
+        .loading {
+            text-align: center;
+            margin: 20px;
+            display: none;
+        }
+        .btn-fundamental {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #ff69b4;
+            color: white;
+            border: 1px solid #ced4da;
+            margin-bottom: 10px;
+        }
+        .btn-fundamental:hover {
+            background-color: #ff1493;
+            color: white;
+        }
+        .fundamental-data {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+        }
+        .fundamental-data h3 {
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #dee2e6;
+        }
+        .fundamental-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .fundamental-table th {
+            background-color: #e9ecef;
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+            font-weight: bold;
+            color: #495057;
+        }
+        .fundamental-table td {
+            padding: 12px;
+            border: 1px solid #dee2e6;
+            background-color: white;
+            text-align: center;
+        }
+        .fundamental-table tr:hover td {
+            background-color: #f8f9fa;
+        }
+        .custom-stock-input input[type="text"] {
+            width: 50px;
+            height: 35px;
+            padding: 10px;
+            border: 1px solid #cfc;
+            box-sizing: border-box;
+        }
+        .custom-stock-input button {
+            width: 15%;
+            height: 35px;
+            align-items: center;
+        }
+	.price-input {
+            width: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TWS數據查詢</h1>
+
+        <div class="quick-stock-buttons">
+            <button onclick="fillStockSymbol('2330')">台積電 (2330)</button>
+            <button onclick="fillStockSymbol('2317')">鴻海 (2317)</button>
+            <button onclick="fillStockSymbol('2382')">廣達 (2382)</button>
+            <button onclick="fillStockSymbol('4938')">和碩 (4938)</button>
+            <button onclick="fillStockSymbol('3189')">景碩 (3189)</button>
+            <button onclick="fillStockSymbol('')" id="custom-stock-1" class="custom-stock">自訂股票 1</button>
+            <button onclick="fillStockSymbol('')" id="custom-stock-2" class="custom-stock">自訂股票 2</button>
+            <button onclick="fillStockSymbol('')" id="custom-stock-3" class="custom-stock">自訂股票 3</button>
+            <button onclick="fillStockSymbol('')" id="custom-stock-4" class="custom-stock">自訂股票 4</button>
+            <button onclick="fillStockSymbol('')" id="custom-stock-5" class="custom-stock">自訂股票 5</button>
+        </div>
+        <div class="custom-stock-input">
+            <button onclick="fillStockSymbol('0050')" style="background-color: #add8e6;">元大台灣50 (0050)</button>
+            <button onclick="fillStockSymbol('0056')" style="background-color: #add8e6;">元大高股息 (0056)</button>
+            <input type="text" id="custom-stock-code" placeholder="按鈕設定-輸入股號">
+            <input type="text" id="custom-stock-name" placeholder="按鈕設定-輸入名稱">
+            <select id="custom-stock-position">
+                <option value="1">位置 1</option>
+                <option value="2">位置 2</option>
+                <option value="3">位置 3</option>
+                <option value="4">位置 4</option>
+                <option value="5">位置 5</option>
+            </select>
+            <button onclick="setCustomStock()">設定</button>
+        </div>
+
+        <button class="btn btn-primary" onclick="fetchData()">獲取數據</button>
+        <button class="btn btn-kdj" onclick="fetchKDData()">計算 KDJ 值</button>
+        <button class="btn btn-kline" id="kline-btn" onclick="toggleReverseKLine()">K線圖 (正常)</button>
+        <button class="btn btn-kline" onclick="showGridChart()" style="background-color: #6a5acd;">網格圖</button>
+
+	<button class="btn btn-primary" onclick="fetchFundamentalData()">基本面數據</button>
+        <button class="btn btn-primary" onclick="showIndustryInfo()" style="background-color: #fa8107;">產業資訊</button>
+        <button class="btn btn-primary" onclick="showRealTimeChart()" style="background-color: #17a2b8;">即時行情</button>
+        <button class="btn btn-primary" onclick="showAveragePriceCalculator()" style="background-color: #ff6347;">股價計算機</button>
+
+        <div class="form-group" style="display: inline-block; margin-right: 10px;">
+        <input type="number" id="gridDays" class="form-control" value="90" min="1" style="width: 80px;" placeholder="天數">
+        </div>
+
+
+
+
+<div class="form-group row align-items-end">
+    <div class="col-md-3">
+        <label for="symbol">股票代碼/名稱:</label>
+        <input type="text" id="symbol" class="form-control" placeholder="例: 2330, 台積電">
+    </div>
+        <button class="btn btn-trend" onclick="showTrendChart()">走勢圖</button>
+
+        <button class="btn btn-secondary" onclick="toggleWatchlist()">口袋名單</button>
+
+</div>
+
+<div id="watchlist-container" style="display:none; margin-top: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;">
+    <h5>我的口袋名單</h5>
+    <div class="input-group mb-3">
+        <input type="text" id="new-watchlist-symbol" class="form-control" placeholder="輸入股號/代碼 (例: 2330)">
+        <button class="btn btn-success" onclick="addSymbolToWatchlist()">新增股號</button>
+        <button class="btn btn-warning ms-2" onclick="checkAllWatchlistStatus()">
+            <i class="fas fa-check-circle"></i> 檢查所有股號狀態
+        </button>
+    </div>
+    <ul id="watchlist-list" class="list-group">
+        </ul>
+</div>
+
+
+
+
+
+        <div class="loading" id="loading">載入中...</div>
+        <div id="chart-container">
+            <button class="close-chart-btn" onclick="closeChart()">關閉圖表</button>
+        </div>
+        <div id="stock-name" class="stock-name"></div>
+
+        <div id="fundamental-data" class="fundamental-data" style="display: none;">
+            <h3>基本面數據</h3>
+            <table class="fundamental-table">
+                <tr>
+                    <th>項目</th>
+                    <th>數值</th>
+                </tr>
+                <tr>
+                    <td>股價</td>
+                    <td id="current-price"></td>
+                </tr>
+                <tr>
+                    <td>本益比</td>
+                    <td id="pe-ratio"></td>
+                </tr>
+                <tr>
+                    <td>殖利率</td>
+                    <td id="dividend-yield"></td>
+                </tr>
+                <tr>
+                    <td>最新營收</td>
+                    <td id="latest-revenue"></td>
+                </tr>
+                <tr>
+                    <td>上月營收</td>
+                    <td id="previous-revenue"></td>
+                </tr>
+                <tr>
+                    <td>同期營收年增率</td>
+                    <td id="revenue-growth-rate"></td>
+                </tr>
+            </table>
+        </div>
+
+        <div id="output" class="mt-4">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>成交張數</th>
+                        <th>開盤價</th>
+                        <th>最高價</th>
+                        <th>最低價</th>
+                        <th>收盤價</th>
+                        <th>漲跌%數</th>
+                        <th>5日均價</th>
+                        <th>9日均價</th>
+                        <th>K 值</th>
+                        <th>D 值</th>
+                        <th>J 值</th>
+                        <th>備註</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                </tbody>
+            </table>
+        </div>
+
+        <div id="error-message" class="alert alert-danger mt-4" style="display: none;"></div>
+    </div>
+
+
+<!-- 股票平均價計算機 Modal -->
+<div class="modal fade" id="avgPriceModal" tabindex="-1" aria-labelledby="avgPriceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="avgPriceModalLabel">平均股價計算機</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="avg-price-input-group">
+                    <label>價格:</label>
+                    <input type="number" id="avg-price" step="0.01" min="0" placeholder="輸入價格" class="price-input">
+                    <label>股數:</label>
+                    <input type="number" id="avg-shares" min="1" placeholder="輸入股數" class="price-input">
+                    <br><br>
+                    <label>當前收盤價:</label>
+                    <input type="number" id="current-close-price" step="0.01" min="0" placeholder="輸入當前收盤價">
+                    <br><br>
+                    <button class="btn btn-success" onclick="addAvgEntry()">新增</button>
+                    <button class="btn btn-success" onclick="calculateAvgPrice()">計算平均價與報酬率</button>
+                </div>
+                <div id="avg-price-entries"></div>
+                <div id="avg-price-result"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <script>
+let avgTransactions = [];
+
+        let isReversed = false; // 全域變數，追蹤 K 線圖是否反轉
+
+        window.addEventListener('load', loadCustomStocks);
+
+        function loadCustomStocks() {
+            for (let i = 1; i <= 5; i++) {
+                const savedStock = localStorage.getItem(`customStock${i}`);
+                if (savedStock) {
+                    const { code, name } = JSON.parse(savedStock);
+                    const button = document.getElementById(`custom-stock-${i}`);
+                    button.textContent = `${name} (${code})`;
+                    button.onclick = () => fillStockSymbol(code);
+                }
+            }
+        }
+
+        function setCustomStock() {
+            const code = document.getElementById('custom-stock-code').value;
+            const name = document.getElementById('custom-stock-name').value;
+            const position = document.getElementById('custom-stock-position').value;
+
+            if (!code || !name) {
+                alert('請輸入股票代碼和名稱');
+                return;
+            }
+
+            const button = document.getElementById(`custom-stock-${position}`);
+            button.textContent = `${name} (${code})`;
+            button.onclick = () => fillStockSymbol(code);
+
+            localStorage.setItem(`customStock${position}`, JSON.stringify({ code, name }));
+
+            document.getElementById('custom-stock-code').value = '';
+            document.getElementById('custom-stock-name').value = '';
+        }
+
+        function fillStockSymbol(symbol) {
+            document.getElementById('symbol').value = symbol;
+            document.getElementById('symbol').focus();
+        }
+
+        function formatNumberWithCommas(number) {
+            return number.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        async function fetchStockName(symbol) {
+            const url = `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockInfo&data_id=${symbol}`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.data && data.data.length > 0) {
+                    return data.data[0].stock_name;
+                }
+                return null;
+            } catch (error) {
+                console.error("獲取公司名稱失敗：", error);
+                return null;
+            }
+        }
+
+        async function fetchStockCodeByName(name) {
+            const url = `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockInfo`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.data && data.data.length > 0) {
+                    const stock = data.data.find(item => item.stock_name === name);
+                    return stock ? stock.stock_id : null;
+                }
+                return null;
+            } catch (error) {
+                console.error("根據名稱查詢股票代碼失敗：", error);
+                return null;
+            }
+        }
+
+        async function resolveSymbol(input) {
+            const trimmedInput = input.trim();
+            if (!trimmedInput) return null;
+
+            const stockCodePattern = /^[0-9]{4}$|^[0-9]{5}[A-Za-z]$/;
+            if (stockCodePattern.test(trimmedInput)) {
+                return trimmedInput;
+            }
+
+            const stockCode = await fetchStockCodeByName(trimmedInput);
+            return stockCode || trimmedInput;
+        }
+
+        async function fetchData() {
+            let symbol = document.getElementById('symbol').value;
+            const tableBody = document.getElementById('table-body');
+            const errorMessage = document.getElementById('error-message');
+            const stockNameDiv = document.getElementById('stock-name');
+            const chartContainer = document.getElementById('chart-container');
+
+            tableBody.innerHTML = '';
+            errorMessage.style.display = 'none';
+            stockNameDiv.textContent = '';
+            chartContainer.innerHTML = '';
+            chartContainer.style.display = 'none';
+
+            if (!symbol) {
+                errorMessage.textContent = '請輸入股票代碼或公司名稱！';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            const originalSymbol = symbol;
+            symbol = await resolveSymbol(symbol);
+            if (!symbol) {
+                errorMessage.textContent = '無法解析股票代碼或名稱，請檢查輸入！';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            const stockName = await fetchStockName(symbol);
+            stockNameDiv.textContent = stockName ? `${stockName} (${symbol})` : `${originalSymbol}`;
+
+            try {
+                const today = new Date();
+                const endDate = today.toISOString().split('T')[0];
+                const startDate = new Date(today);
+                startDate.setDate(today.getDate() - 30);
+                const startDateStr = startDate.toISOString().split('T')[0];
+
+                const url = `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockPrice&data_id=${symbol}&start_date=${startDateStr}&end_date=${endDate}`;
+                const response = await fetch(url);
+                const result = await response.json();
+
+                if (!result.data || result.data.length === 0) {
+                    throw new Error('無法獲取股票數據');
+                }
+
+                result.data.reverse().forEach((item, index, array) => {
+                    const currentClose = parseFloat(item.close);
+                    if (index < array.length - 1) {
+                        const prevClose = parseFloat(array[index + 1].close);
+                        const changePercent = ((currentClose - prevClose) / prevClose) * 100;
+                        item.changePercent = changePercent;
+                    } else {
+                        item.changePercent = 0;
+                    }
+
+                    let fiveDayMA = 0;
+                    if (index + 4 < array.length) {
+                        const fiveDaySum = array.slice(index, index + 5)
+                            .reduce((sum, day) => sum + parseFloat(day.close), 0);
+                        fiveDayMA = fiveDaySum / 5;
+                    } else {
+                        const availableDays = array.slice(index)
+                            .reduce((sum, day) => sum + parseFloat(day.close), 0);
+                        fiveDayMA = availableDays / (array.length - index);
+                    }
+
+                    let nineDayMA = 0;
+                    if (index + 8 < array.length) {
+                        const nineDaySum = array.slice(index, index + 9)
+                            .reduce((sum, day) => sum + parseFloat(day.close), 0);
+                        nineDayMA = nineDaySum / 9;
+                    } else {
+                        const availableDays = array.slice(index)
+                            .reduce((sum, day) => sum + parseFloat(day.close), 0);
+                        nineDayMA = availableDays / (array.length - index);
+                    }
+
+                    let note = '';
+                    if (currentClose > fiveDayMA) {
+                        note += '▲';
+                    }
+                    if (currentClose > nineDayMA) {
+                        note += '●';
+                    }
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.date}</td>
+                        <td>${formatNumberWithCommas(item.Trading_Volume)}</td>
+                        <td>${formatNumberWithCommas(item.open)}</td>
+                        <td>${formatNumberWithCommas(item.max)}</td>
+                        <td>${formatNumberWithCommas(item.min)}</td>
+                        <td>${formatNumberWithCommas(currentClose)}</td>
+                        <td>${item.changePercent.toFixed(2)}%</td>
+                        <td>${formatNumberWithCommas(fiveDayMA)}</td>
+                        <td>${formatNumberWithCommas(nineDayMA)}</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td>${note}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+
+            } catch (error) {
+                errorMessage.textContent = '獲取數據失敗：' + error.message;
+                errorMessage.style.display = 'block';
+            }
+        }
+
+        async function fetchKDData() {
+            let symbol = document.getElementById('symbol').value;
+            const tableBody = document.getElementById('table-body');
+            const stockNameDiv = document.getElementById('stock-name');
+            const errorMessage = document.getElementById('error-message');
+
+            tableBody.innerHTML = '';
+            errorMessage.style.display = 'none';
+            stockNameDiv.textContent = '';
+
+            if (!symbol) {
+                errorMessage.textContent = '請輸入股票代碼或公司名稱！';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            symbol = await resolveSymbol(symbol);
+            if (!symbol) {
+                errorMessage.textContent = '無法找到對應的股票代碼，請檢查輸入！';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            const fundamentalDataElements = document.querySelectorAll('.fundamental-data');
+            fundamentalDataElements.forEach(element => {
+                element.style.display = 'none';
+            });
+
+            document.getElementById('loading').style.display = 'block';
+
+            const url = `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockPrice&data_id=${symbol}&start_date=2023-01-01`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.data && data.data.length > 0) {
+                    const kdjValues = calculateKD(data.data);
+
+                    kdjValues.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${item.date}</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>${item.high}</td>
+                            <td>${item.low}</td>
+                            <td>${item.close}</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>${item.K.toFixed(2)}</td>
+                            <td>${item.D.toFixed(2)}</td>
+                            <td>${item.J.toFixed(2)}</td>
+                            <td>${item.remark}</td>
+                        `;
+                        tableBody.insertBefore(row, tableBody.firstChild);
+                    });
+                } else {
+                    errorMessage.textContent = '未找到數據，請檢查股票代碼或名稱。';
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                console.error("抓取數據時發生錯誤：", error);
+                errorMessage.textContent = '抓取數據時發生錯誤，請稍後再試。';
+                errorMessage.style.display = 'block';
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function calculateKD(data) {
+            const period = 9;
+            const kdjValues = [];
+
+            for (let i = period - 1; i < data.length; i++) {
+                const close = parseFloat(data[i].close);
+                const high = parseFloat(data[i].max);
+                const low = parseFloat(data[i].min);
+
+                const periodHigh = Math.max(...data.slice(i - period + 1, i + 1).map(d => parseFloat(d.max)));
+                const periodLow = Math.min(...data.slice(i - period + 1, i + 1).map(d => parseFloat(d.min)));
+                const rsv = ((close - periodLow) / (periodHigh - periodLow)) * 100;
+
+                const K = (i === period - 1) ? rsv : (2 / 3) * kdjValues[i - period].K + (1 / 3) * rsv;
+                const D = (i === period - 1) ? K : (2 / 3) * kdjValues[i - period].D + (1 / 3) * K;
+                const J = 3 * D - 2 * K;
+
+                let remark = '';
+                if (J < 21) {
+                    remark = '★';
+                }
+
+                kdjValues.push({
+                    date: data[i].date,
+                    close: close,
+                    high: high,
+                    low: low,
+                    K: K,
+                    D: D,
+                    J: J,
+                    remark: remark
+                });
+            }
+
+            return kdjValues;
+        }
+
+        function toggleReverseKLine() {
+            isReversed = !isReversed; // 切換反轉狀態
+            const klineBtn = document.getElementById('kline-btn');
+            klineBtn.textContent = `K線圖 (${isReversed ? '反轉' : '正常'})`; // 更新按鈕文字
+            showKLineChart(); // 重新繪製 K 線圖
+        }
+
+        async function showKLineChart() {
+            let symbol = document.getElementById('symbol').value;
+            const errorMessage = document.getElementById('error-message');
+            const chartContainer = document.getElementById('chart-container');
+            const loading = document.getElementById('loading');
+
+            if (!symbol) {
+                errorMessage.textContent = '請輸入股票代碼或公司名稱！';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            symbol = await resolveSymbol(symbol);
+            if (!symbol) {
+                errorMessage.textContent = '無法找到對應的股票代碼，請檢查輸入！';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            const fundamentalDataElements = document.querySelectorAll('.fundamental-data');
+            fundamentalDataElements.forEach(element => {
+                element.style.display = 'none';
+            });
+
+            loading.style.display = 'block';
+            chartContainer.innerHTML = '<button class="close-chart-btn" onclick="closeChart()">關閉圖表</button>';
+            chartContainer.style.display = 'block';
+
+            try {
+                const today = new Date();
+                const endDate = today.toISOString().split('T')[0];
+                const startDate = new Date(today);
+                startDate.setDate(today.getDate() - 90);
+                const startDateStr = startDate.toISOString().split('T')[0];
+
+                const url = `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockPrice&data_id=${symbol}&start_date=${startDateStr}&end_date=${endDate}`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (!data.data || data.data.length === 0) {
+                    throw new Error('無法獲取股票數據');
+                }
+
+                const stockData = {
+                    date: data.data.map(item => item.date),
+                    open: data.data.map(item => item.open),
+                    high: data.data.map(item => item.max),
+                    low: data.data.map(item => item.min),
+                    close: data.data.map(item => item.close),
+                    volume: data.data.map(item => item.Trading_Volume)
+                };
+
+                plotCandlestickChart(stockData);
+
+            } catch (error) {
+                errorMessage.textContent = '獲取數據失敗：' + error.message;
+                errorMessage.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+
+
+
+function plotCandlestickChart(data) {
+    if (!data || !data.date || !Array.isArray(data.date)) {
+        console.error('數據格式錯誤');
+        return;
+    }
+
+    // 計算反轉價格的基準（最大值 + 最小值的總和）
+    const priceMax = Math.max(...data.high);
+    const priceMin = Math.min(...data.low);
+    const reverseBase = priceMax + priceMin;
+
+    // 根據 isReversed 反轉價格數據
+    const reversedData = {
+        date: data.date,
+        open: isReversed ?
+            data.open.map(p => reverseBase - p) : data.open,
+        high: isReversed ?
+            data.high.map(p => reverseBase - p) : data.high,
+        low: isReversed ?
+            data.low.map(p => reverseBase - p) : data.low,
+        close: isReversed ?
+            data.close.map(p => reverseBase - p) : data.close,
+        volume: data.volume // 成交量不反轉
+    };
+    const calculateMA = (prices, period) => {
+        return prices.map((_, index) => {
+            if (index < period - 1) return null;
+            const sum = prices.slice(index - period + 1, index + 1).reduce((a, b) => a + b, 0);
+            return sum / period;
+        });
+    };
+
+    const calculateBollinger = (prices, period = 20, multiplier = 2) => {
+        const ma = calculateMA(prices, period);
+        const upperBand = [];
+        const lowerBand = [];
+
+        for (let i = 0; i < prices.length; i++) {
+            if (i < period - 1) {
+                upperBand.push(null);
+                lowerBand.push(null);
+                continue;
+            }
+
+            const slice = prices.slice(i - period + 1, i + 1);
+            const sum = slice.reduce((a, b) => a + Math.pow(b - ma[i], 2), 0);
+            const std = Math.sqrt(sum / period);
+            upperBand.push(ma[i] + multiplier * std);
+            lowerBand.push(ma[i] - multiplier * std);
+        }
+
+        return { ma, upperBand, lowerBand };
+    };
+    const calculateMACD = (prices) => {
+        const calculateEMA = (data, period) => {
+            const k = 2 / (period + 1);
+            const ema = [];
+            let prevEMA = data[0];
+            
+            for (let i = 0; i < data.length; i++) {
+                if (i === 0) {
+                    ema.push(data[0]);
+                } else {
+                    prevEMA = (data[i] - prevEMA) * k + prevEMA;
+                    ema.push(prevEMA);
+                }
+            }
+            return ema;
+        };
+        const ema12 = calculateEMA(prices, 12);
+        const ema26 = calculateEMA(prices, 26);
+        const macdLine = ema12.map((v, i) => v - ema26[i]);
+        const signalLine = calculateEMA(macdLine, 9);
+        const histogram = macdLine.map((v, i) => v - signalLine[i]);
+        return { macdLine, signalLine, histogram };
+    };
+    const calculateKDJ = (data, period = 9) => {
+        const rsv = [];
+        const k = [];
+        const d = [];
+        const j = [];
+        for (let i = 0; i < data.close.length; i++) {
+            if (i < period - 1) {
+                rsv.push(null);
+                k.push(50);
+                d.push(50);
+                j.push(50);
+                continue;
+            }
+            const periodLow = Math.min(...data.low.slice(i - period + 1, i + 1));
+            const periodHigh = Math.max(...data.high.slice(i - period + 1, i + 1));
+            const close = data.close[i];
+            const rsvValue = ((close - periodLow) / (periodHigh - periodLow)) * 100;
+            rsv.push(rsvValue);
+            const kValue = (i === period - 1) ? rsvValue : (2 / 3) * (k[i - 1] || 50) + (1 / 3) * rsvValue;
+            k.push(kValue);
+            const dValue = (i === period - 1) ?
+                kValue : (2 / 3) * (d[i - 1] || 50) + (1 / 3) * kValue;
+            d.push(dValue);
+            const jValue = (3 * kValue) - (2 * dValue);
+            j.push(jValue);
+        }
+        return { k, d, j };
+    };
+    const formatDate = (dateStr) => {
+        const date = new Date(dateStr);
+        return `${date.getMonth() + 1}/${date.getDate()}\n${date.getFullYear().toString().slice(-2)}`;
+    };
+    const formattedDates = data.date.map(formatDate);
+
+    // 計算 Y 軸刻度
+    const yAxisTicks = () => {
+        const minPrice = Math.min(...reversedData.low);
+        const maxPrice = Math.max(...reversedData.high);
+        const range = maxPrice - minPrice;
+        const step = range / 10; // 分成 10 個刻度
+        const tickVals = [];
+        const tickText = [];
+        for (let i = 0; i <= 10; i++) {
+            const val = minPrice + i * step;
+            tickVals.push(val);
+            // 在反轉模式下，顯示原始價格（reverseBase - val）
+            tickText.push(isReversed ? (reverseBase - val).toFixed(2) : val.toFixed(2));
+        }
+        return { tickvals: tickVals, ticktext: tickText };
+    };
+    const { tickvals, ticktext } = yAxisTicks();
+
+    // ====================================================================
+    // 偵測「穿越下包絡」條件並生成 Plotly Shapes (透明紅色色塊)
+    // ====================================================================
+    const entryShapes = [];
+    const bollingerResult = calculateBollinger(reversedData.close);
+    const lowerBand = bollingerResult.lowerBand;
+    const prices = reversedData.close;
+    
+    // 遍歷所有收盤價和下軌
+    for (let i = 0; i < prices.length; i++) {
+        const close = prices[i];
+        const lower = lowerBand[i];
+
+        // 檢查「穿越下包絡」條件 (收盤價 < 布林下軌)
+        if (close !== null && lower !== null && parseFloat(close) < parseFloat(lower)) {
+            entryShapes.push({
+                type: 'rect',
+                // 使用索引 i-0.5 到 i+0.5 來覆蓋當前的 K 線/Bar 寬度
+                xref: 'x',
+                yref: 'paper', // 關鍵：參考整個圖表的 Y 軸範圍 (0 到 1)
+                x0: i - 0.5, // 類別軸的起始位置
+                x1: i + 0.5, // 類別軸的結束位置
+                y0: 0, // 從圖表最底端開始 (paper = 0)
+                y1: 1, // 到圖表最頂端結束 (paper = 1)
+                fillcolor: 'rgba(255, 0, 0, 0.2)', // 紅色，半透明
+                line: { width: 0 },
+                layer: 'below' // 確保色塊在所有線條和指標的下方
+            });
+        }
+    }
+    // ====================================================================
+    
+
+    const traces = [
+        {
+            x: formattedDates,
+            y: reversedData.volume,
+            type: 'bar',
+            name: '成交量',
+            yaxis: 'y2',
+            marker: {
+                color: reversedData.close.map((close, i) => close >= reversedData.open[i] ? 'red' : 'green')
+            }
+        },
+        {
+            x: formattedDates,
+            open: reversedData.open,
+            high: reversedData.high,
+            low: reversedData.low,
+            close: reversedData.close,
+            type: 'candlestick',
+            name: '股價',
+            increasing: { line: { color: 'red' } },
+            decreasing: { line: { color: 'green' } }
+        },
+        {
+            x: formattedDates,
+            y: calculateMA(reversedData.close, 5),
+            type: 'scatter',
+            mode: 'lines',
+            name: `5日均線 (${formatNumberWithCommas(calculateMA(reversedData.close, 5).filter(v => v !== null).slice(-1)[0] || 0)})`,
+            line: { color: 'blue', width: 1 }
+        },
+        {
+            x: formattedDates,
+            y: calculateMA(reversedData.close, 9),
+            type: 'scatter',
+            mode: 'lines',
+            name: `9日均線 (${formatNumberWithCommas(calculateMA(reversedData.close, 9).filter(v => v !== null).slice(-1)[0] || 0)})`,
+            line: { color: 'purple', width: 1 }
+        },
+        {
+            x: formattedDates,
+            y: bollingerResult.upperBand,
+            type: 'scatter',
+            mode: 'lines',
+            name: '上軌(2σ)',
+            line: { color: 'rgba(200, 0, 0, 0.5)', width: 1, dash: 'dash' },
+            showlegend: true
+        },
+        {
+            x: formattedDates,
+            y: bollingerResult.ma,
+            type: 'scatter',
+            mode: 'lines',
+            name: `中軌(20MA) (${formatNumberWithCommas(bollingerResult.ma.filter(v => v !== null).slice(-1)[0] ||
+                0)})`,
+            line: { color: 'rgba(243, 156, 18, 1)', width: 1, dash: 'dash' },
+            showlegend: true
+        },
+        {
+            x: formattedDates,
+            y: bollingerResult.lowerBand,
+            type: 'scatter',
+            mode: 'lines',
+            name: '下軌(2σ)',
+            line: { color: 'rgba(0, 200, 0, 0.5)', width: 1, dash: 'dash' },
+            showlegend: true
+        },
+        {
+            x: formattedDates,
+            y: calculateMACD(reversedData.close).macdLine,
+            type: 'scatter',
+            mode: 'lines',
+            name: 'MACD',
+            line: { color: '#00F' },
+            yaxis: 'y3'
+        },
+        {
+            x: formattedDates,
+            y: calculateMACD(reversedData.close).signalLine,
+            type: 'scatter',
+            mode: 'lines',
+            name: '信號線',
+            line: { color: '#F00' },
+            yaxis: 'y3'
+        },
+        {
+            x: formattedDates,
+            y: calculateMACD(reversedData.close).histogram,
+            type: 'bar',
+            name: 'MACD柱狀',
+            marker: {
+                color: calculateMACD(reversedData.close).histogram.map(v => v >= 0 ? '#FF0000' : 
+                '#00AA00')
+            },
+            yaxis: 'y3'
+        },
+        {
+            x: formattedDates,
+            y: calculateKDJ(reversedData).k,
+            type: 'scatter',
+            mode: 'lines',
+            name: 'K值',
+            line: { color: '#FF8C00' },
+            yaxis: 'y4'
+        },
+        {
+            x: formattedDates,
+            y: calculateKDJ(reversedData).d,
+            type: 'scatter',
+            mode: 'lines',
+            name: 'D值',
+            line: { color: '#4169E1' },
+            yaxis: 'y4'
+        },
+        {
+            x: formattedDates,
+            y: calculateKDJ(reversedData).j,
+            type: 'scatter',
+            mode: 'lines',
+            name: 'J值',
+            line: { color: '#FF1493' },
+            yaxis: 'y4'
+        }
+    ];
+
+    const layout = {
+        dragmode: 'dragannotation',
+        title: {
+            text: `股票K線圖 (${isReversed ? '反轉' : '正常'})`,
+            font: { size: 24 }
+        },
+        height: 900,
+        grid: {
+            rows: 4,
+            columns: 1,
+            pattern: 'independent',
+            rowheight: [0.45, 0.15, 0.2, 0.2]
+        },
+        // 關鍵：將生成的 shapes (透明色塊) 加入 layout 中
+        shapes: entryShapes, 
+        yaxis: {
+            title: '價格',
+            domain: [0.5, 1],
+            tickformat: '.2f',
+            fixedrange: false,
+            tickvals: tickvals, // 手動設置刻度位置
+            ticktext: ticktext, // 手動設置刻度文字（反轉時顯示原始價格）
+            range: [Math.min(...tickvals), Math.max(...tickvals)] // 確保範圍正確
+        },
+        yaxis2: {
+            title: '成交量',
+            domain: [0.35, 0.42],
+            fixedrange: true,
+            autorange: true
+        },
+        yaxis3: {
+            title: 'MACD',
+            domain: [0.23, 0.33],
+            fixedrange: true
+        },
+        yaxis4: {
+            title: 'KDJ',
+            domain: [0.05, 0.22],
+            fixedrange: true
+        },
+        xaxis: {
+            title: '日期',
+            rangeslider: {
+                visible: false
+            },
+            type: 'category',
+            categoryarray: formattedDates,
+            categoryorder: 'array',
+            tickangle: 90,
+            tickfont: { size: 6 },
+            showgrid: true,
+            gridcolor: '#eee'
+        },
+        plot_bgcolor: '#ffffff',
+        paper_bgcolor: '#ffffff',
+        showlegend: true,
+        legend: {
+            x: 0,
+            y: 1.12,
+            orientation: 'h',
+            yanchor: 'bottom',
+            font: { size: 11 }
+        },
+        margin: { l: 50, r: 50, t: 50, b: 40 },
+        annotations: [{
+            text: 'MACD(12,26,9)',
+            font: { size: 11 },
+            xref: 'paper',
+            yref: 'paper',
+            x: 0,
+            y: 0.41,
+            showarrow: false
+        }, {
+            text: 'KDJ(9,3,3)',
+            font: { size: 11 },
+            xref: 'paper',
+            yref: 'paper',
+            x: 0,
+            y: 0.21,
+            showarrow: false
+        }, {
+            text: 'BB(20,2σ)',
+            font: { size: 11 
+            },
+            xref: 'paper',
+            yref: 'paper',
+            x: 0,
+            y: 0.95,
+            showarrow: false
+        }]
+    };
+    const config = {
+        responsive: true,
+        displayModeBar: true,
+        modeBarButtonsToAdd: [{
+            name: 'toggleHoverText',
+            title: '切換數值顯示',
+            icon: Plotly.Icons.pencil,
+            click: function(gd) {
+                const newHoverMode = gd._fullLayout.hovermode === 'closest' ?
+                    false : 'closest';
+                Plotly.relayout(gd, 'hovermode', newHoverMode);
+            }
+        }],
+        displaylogo: false,
+        scrollZoom: true
+    };
+    const chartContainer = document.getElementById('chart-container');
+    chartContainer.style.display = 'block';
+    Plotly.newPlot('chart-container', traces, layout, config);
+}
+
+// ... 函數其餘部分 (detectHammer 等) 保持不變
+
+
+
+
+        function detectHammer(data) {
+            const hammers = [];
+            for (let i = 0; i < data.close.length; i++) {
+                const bodyLength = Math.abs(data.close[i] - data.open[i]);
+                const upperShadow = data.high[i] - Math.max(data.open[i], data.close[i]);
+                const lowerShadow = Math.min(data.open[i], data.close[i]) - data.low[i];
+                
+                const isDowntrend = i >= 3 && 
+                    (data.close[i-1] + data.close[i-2] + data.close[i-3]) / 3 > data.close[i];
+                
+                const totalLength = data.high[i] - data.low[i];
+                const bodyToTotalRatio = bodyLength / totalLength;
+                const lowerShadowRatio = lowerShadow / bodyLength;
+                const upperShadowRatio = upperShadow / bodyLength;
+
+                const isHammer = lowerShadow > bodyLength * 1.5 && 
+                    upperShadow < bodyLength * 0.5 && 
+                    bodyToTotalRatio < 0.4 && 
+                    isDowntrend;
+
+                if (isHammer) {
+                    console.log(`檢測到槌子線 - 日期: ${data.date[i]}`);
+                    console.log(`- 下影線比例: ${lowerShadowRatio.toFixed(2)}`);
+                    console.log(`- 上影線比例: ${upperShadowRatio.toFixed(2)}`);
+                    console.log(`- 實體比例: ${bodyToTotalRatio.toFixed(2)}`);
+                    
+                    hammers.push({
+                        index: i,
+                        date: data.date[i],
+                        strength: lowerShadowRatio,
+                        bodyRatio: bodyToTotalRatio
+                    });
+                }
+            }
+            
+            if (hammers.length > 0) {
+                console.log('找到的槌子線:', hammers);
+                markHammerOnChart(data, hammers);
+            }
+        }
+
+        function markHammerOnChart(data, hammers) {
+            const formatDate = (dateStr) => {
+                const date = new Date(dateStr);
+                return `${date.getMonth() + 1}/${date.getDate()}\n${date.getFullYear().toString().slice(-2)}`;
+            };
+
+            const annotations = hammers.map(hammer => {
+                const formattedDate = formatDate(hammer.date);
+                return {
+                    x: formattedDate,
+                    y: data.low[hammer.index] - (data.high[hammer.index] - data.low[hammer.index]) * 0.1,
+                    text: `槌子線<br>強度: ${hammer.strength.toFixed(1)}<br>日期: ${hammer.date}`,
+                    showarrow: true,
+                    arrowhead: 2,
+                    arrowsize: 1,
+                    arrowwidth: 2,
+                    arrowcolor: '#FF4500',
+                    ax: 0,
+                    ay: 40,
+                    font: {
+                        size: 9,
+                        color: '#FF4500',
+                        weight: 'bold'
+                    },
+                    bgcolor: 'rgba(255, 255, 255, 0.9)',
+                    bordercolor: '#FF4500',
+                    borderwidth: 1,
+                    borderpad: 4,
+                    hoverlabel: {
+                        bgcolor: '#FF4500'
+                    },
+                    xanchor: 'center',
+                    yanchor: 'top',
+                    draggable: true,
+                    captureevents: true,
+                    editable: true
+                };
+            });
+
+            const legendTrace = {
+                x: [null],
+                y: [null],
+                type: 'scatter',
+                mode: 'markers',
+                name: '槌子線標記',
+                marker: {
+                    symbol: 'triangle-up',
+                    size: 10,
+                    color: '#FF4500',
+                    line: { width: 1 }
+                },
+                visible: 'legendonly'
+            };
+
+            const update = {
+                shapes: [],
+                annotations: annotations
+            };
+
+            const config = {
+                editable: true,
+                modeBarButtonsToAdd: ['drawopenpath', 'eraseshape']
+            };
+
+            Plotly.addTraces('chart-container', legendTrace);
+            Plotly.update('chart-container', {}, update, config);
+        }
+
+        async function showGridChart() {
+            let symbol = document.getElementById('symbol').value;
+            const chartContainer = document.getElementById('chart-container');
+            const loading = document.getElementById('loading');
+            const errorMessage = document.getElementById('error-message');
+
+            console.log('開始執行 showGridChart，股票代碼:', symbol);
+
+            if (!symbol) {
+                alert('請輸入股票代碼或公司名稱！');
+                console.log('未輸入股票代碼');
+                return;
+            }
+
+            symbol = await resolveSymbol(symbol);
+            if (!symbol) {
+                alert('無法找到對應的股票代碼，請檢查輸入！');
+                console.log('無法解析股票代碼');
+                return;
+            }
+
+            loading.style.display = 'block';
+            errorMessage.style.display = 'none';
+            chartContainer.style.display = 'block';
+            chartContainer.innerHTML = '<button class="close-chart-btn" onclick="closeChart()">關閉圖表</button>';
+
+            try {
+                console.log('開始獲取數據...');
+                const today = new Date();
+                const endDate = today.toISOString().split('T')[0];
+                const gridDays = parseInt(document.getElementById('gridDays').value) || 90;
+                const startDate = new Date(today);
+                startDate.setDate(today.getDate() - gridDays);
+                const startDateStr = startDate.toISOString().split('T')[0];
+
+                const stockUrl = `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockPrice&data_id=${symbol}&start_date=${startDateStr}&end_date=${endDate}`;
+                const taiexUrl = `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockPrice&data_id=TAIEX&start_date=${startDateStr}&end_date=${endDate}`;
+
+                const [stockResponse, taiexResponse] = await Promise.all([
+                    fetch(stockUrl),
+                    fetch(taiexUrl)
+                ]);
+
+                const [stockResult, taiexResult] = await Promise.all([
+                    stockResponse.json(),
+                    taiexResponse.json()
+                ]);
+
+                console.log('個股 API 回應:', stockResult);
+                console.log('台股加權指數 API 回應:', taiexResult);
+
+                if (!stockResult.data || stockResult.data.length === 0) {
+                    throw new Error('無法獲取個股數據');
+                }
+                if (!taiexResult.data || taiexResult.data.length === 0) {
+                    throw new Error('無法獲取台股加權指數數據');
+                }
+
+                const stockData = stockResult.data;
+                const taiexData = taiexResult.data;
+
+                const filteredStockData = stockData.filter(item => parseFloat(item.Trading_Volume) > 0);
+                console.log('過濾後個股數據長度:', filteredStockData.length);
+
+                const dates = filteredStockData.map(item => {
+                    const date = new Date(item.date);
+                    return `${date.getMonth() + 1}/${date.getDate()}\n${date.getFullYear().toString().slice(-2)}`;
+                });
+                const prices = filteredStockData.map(item => parseFloat(item.close));
+                const volumes = filteredStockData.map(item => parseFloat(item.Trading_Volume));
+                const highs = filteredStockData.map(item => parseFloat(item.max));
+                const lows = filteredStockData.map(item => parseFloat(item.min));
+
+                const taiexDates = taiexData.map(item => {
+                    const date = new Date(item.date);
+                    return `${date.getMonth() + 1}/${date.getDate()}\n${date.getFullYear().toString().slice(-2)}`;
+                });
+                const taiexPricesRaw = taiexData.map(item => parseFloat(item.close));
+
+                const stockMin = Math.min(...prices);
+                const stockMax = Math.max(...prices);
+                const stockRange = stockMax - stockMin;
+                const taiexMin = Math.min(...taiexPricesRaw);
+                const taiexMax = Math.max(...taiexPricesRaw);
+                const taiexRange = taiexMax - taiexMin;
+                const taiexPrices = taiexPricesRaw.map(price => {
+                    if (taiexRange === 0) return stockMin;
+                    const normalized = (price - taiexMin) / taiexRange;
+                    return stockMin + normalized * stockRange;
+                });
+
+const maxPrice = stockMax;
+const baselinePrice = maxPrice;
+
+const gridLines = [];
+const gridCount = 10;
+for (let i = -5; i <= 5; i++) {
+    const gridPrice = baselinePrice * (1 + i * 0.05);
+    // 只顯示基準線以下和基準線以上不超過10%的網格線
+    if (gridPrice > 0 && gridPrice <= baselinePrice * 1.10) {
+        gridLines.push(gridPrice);
+    }
+}
+
+                const ma5 = calculateMA(prices, 5);
+                const ma9 = calculateMA(prices, 9);
+                const ma16 = calculateMA(prices, 16);
+                const volumeMA5 = calculateMA(volumes, 5);
+	        // 檢測「5MA下方」條件
+    		const below5MAPoints = detectBelow5MA(prices, ma5);
+
+                const macdData = calculateMACD(prices);
+                const kdjData = calculateKDJForGrid(filteredStockData);
+                const jBelow21Points = kdjData.jPoints.filter(point => point.value < 21);
+
+                const crossPoints = [];
+                for (let i = 1; i < macdData.macdLine.length; i++) {
+                    const prevDiff = macdData.macdLine[i-1] - macdData.signalLine[i-1];
+                    const currDiff = macdData.macdLine[i] - macdData.signalLine[i];
+                    if (prevDiff <= 0 && currDiff > 0) {
+                        crossPoints.push(i);
+                    }
+                }
+
+                const goldenCrossPoints = [];
+                for (let i = 1; i < prices.length; i++) {
+                    if (prices[i-1] < ma16[i-1] && prices[i] > ma16[i]) {
+                        goldenCrossPoints.push(i);
+                    }
+                }
+
+                const gridTraces = gridLines.map(price => ({
+                    x: dates,
+                    y: Array(dates.length).fill(price),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: `網格線 ${price.toFixed(2)}`,
+                    line: {
+                        color: price === baselinePrice ? 'rgba(255, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.2)',
+                        dash: 'dash'
+                    },
+                    showlegend: price === baselinePrice
+                }));
+
+                const sarValues = calculateSAR(filteredStockData);
+
+                const latestClose = prices[prices.length - 1];
+                const latestMA5 = ma5[ma5.length - 1];
+                const latestMA16 = ma16[ma16.length - 1];
+
+                const detectSwingBuyPoints = (data, prices, ma5, ma9, volumes, volumeMA5) => {
+                    const buyPoints = [];
+                    
+                    for (let i = 9; i < prices.length; i++) {
+                        let score = 0;
+                        
+                        const last9Days = prices.slice(i - 8, i + 1);
+                        const is9DayHigh = prices[i] === Math.max(...last9Days);
+                        if (is9DayHigh) score += 2;
+
+                        const isVolumeRising = i >= 5 && volumeMA5[i] > volumeMA5[i-1] && 
+                            volumeMA5[i-1] > volumeMA5[i-2];
+                        if (isVolumeRising) score += 2;
+
+                        const isMAUptrend = i >= 2 && ma5[i] > ma5[i-1] && 
+                            ma5[i-1] > ma5[i-2] && ma9[i] > ma9[i-1];
+                        if (isMAUptrend) score += 2;
+
+                        const isVolumePattern = i >= 3 && 
+                            volumes[i-2] > volumes[i-1] && 
+                            volumes[i] > volumes[i-1] * 1.5 && 
+                            volumes[i] > volumes[i-2];
+                        if (isVolumePattern) score += 3;
+
+                        const isTripleBreak = i >= 3 && 
+                            prices[i] > Math.max(...highs.slice(i-3, i));
+                        if (isTripleBreak) score += 2;
+
+                        if (score >= 8) {
+                            buyPoints.push({
+                                index: i,
+                                price: prices[i],
+                                score: score
+                            });
+                        }
+                    }
+                    console.log('波段賣點:', buyPoints);
+                    return buyPoints;
+                };
+
+                const buyPoints = detectSwingBuyPoints(filteredStockData, prices, ma5, ma9, volumes, volumeMA5);
+
+                const traces = [
+                    {
+                        x: taiexDates,
+                        y: taiexPrices,
+                        type: 'scatter',
+                        mode: 'lines',
+                        name: '台股加權指數趨勢',
+                        line: { color: '#000000', width: 1 },
+                        opacity: 0.5,
+                        yaxis: 'y'
+                    },
+                    {
+                        x: dates,
+                        y: prices,
+                        type: 'scatter',
+                        mode: 'lines',
+                        name: `收盤價 (${formatNumberWithCommas(latestClose)})`,
+                        line: { color: '#FFCC22' }
+                    },
+                    {
+                        x: dates,
+                        y: ma5,
+                        type: 'scatter',
+                        mode: 'lines',
+                        name: `5日均線 (${formatNumberWithCommas(latestMA5 || 0)})`,
+                        line: { color: '#87CEFA' }
+                    },
+                    {
+                        x: dates,
+                        y: ma9,
+                        type: 'scatter',
+                        mode: 'lines',
+                        name: '9日均線',
+                        line: { color: '#E6E6FA' }
+                    },
+                    {
+                        x: dates,
+                        y: ma16,
+                        type: 'scatter',
+                        mode: 'lines',
+                        name: `16日均線 (${formatNumberWithCommas(latestMA16 || 0)})`,
+                        line: { color: '#FFB6C1' }
+                    },
+                    {
+                        x: dates,
+                        y: sarValues,
+                        type: 'scatter',
+                        mode: 'markers',
+                        name: 'SAR拋物線',
+                        marker: {
+                            color: '#FF4500',
+                            size: 6,
+                            symbol: 'circle'
+                        }
+                    },
+                    {
+                        x: goldenCrossPoints.map(i => dates[i]),
+                        y: goldenCrossPoints.map(i => prices[i]),
+                        type: 'scatter',
+                        mode: 'markers',
+                        name: '黃金交叉',
+                        marker: {
+                            symbol: 'triangle-up',
+                            size: 12,
+                            color: '#FFFF00',
+                            line: { width: 1, color: '#000000' }
+                        }
+                    },
+                    {
+                        x: dates,
+                        y: macdData.macdLine,
+                        type: 'scatter',
+                        mode: 'lines',
+                        name: 'MACD',
+                        line: { color: '#00F' },
+                        yaxis: 'y2'
+                    },
+                    {
+                        x: dates,
+                        y: macdData.signalLine,
+                        type: 'scatter',
+                        mode: 'lines',
+                        name: '信號線',
+                        line: { color: '#F00' },
+                        yaxis: 'y2'
+                    },
+                    {
+                        x: dates,
+                        y: macdData.histogram,
+                        type: 'bar',
+                        name: 'MACD柱狀',
+                        marker: {
+                            color: macdData.histogram.map(v => v >= 0 ? '#FF0000' : '#00AA00')
+                        },
+                        yaxis: 'y2'
+                    },
+                    {
+                        x: crossPoints.map(i => dates[i]),
+                        y: crossPoints.map(i => prices[i]),
+                        type: 'scatter',
+                        mode: 'markers',
+                        name: 'MACD交叉點',
+                        marker: {
+                            symbol: 'triangle-down',
+                            size: 12,
+                            color: '#0000FF'
+                        },
+                        showlegend: true
+                    },
+                    {
+                        x: jBelow21Points.map(point => dates[point.index]),
+                        y: jBelow21Points.map(point => prices[point.index]),
+                        type: 'scatter',
+                        mode: 'markers',
+                        name: 'J值<21',
+                        marker: {
+                            symbol: 'triangle-up',
+                            size: 12,
+                            color: '#00FF00',
+                            line: { width: 1, color: '#000000' }
+                        },
+                        showlegend: true
+                    },
+	  	   {
+           		x: below5MAPoints.map(point => dates[point.index]),
+            		y: below5MAPoints.map(point => point.price),
+            		type: 'scatter',
+            		mode: 'markers+text',
+            		name: '5MA下方',
+            		text: below5MAPoints.map(() => '⛛'),
+            		textposition: 'bottom',
+            		marker: {
+                	    symbol: 'triangle-down',
+                	    size: 12,
+                	    color: 'black', // 青色符號
+                	    line: { width: 1, color: '#0080FF' }
+            	    	},
+            		showlegend: true
+            	     },
+                    {
+                        x: buyPoints.map(point => dates[point.index]),
+                        y: buyPoints.map(point => point.price),
+                        type: 'scatter',
+                        mode: 'markers',
+                        name: '波段賣點(看區間外)',
+                        marker: {
+                            symbol: 'triangle-up',
+                            size: 12,
+                            color: '#FF0000',
+                            line: { width: 1, color: '#000000' }
+                        },
+                        text: buyPoints.map(point => `得分: ${point.score}`),
+                        textposition: 'top',
+                        showlegend: true
+                    }
+                ];
+
+                const layout = {
+                    title: '股價走勢圖',
+                    xaxis: {
+                        title: '日期',
+                        domain: [0, 1],
+                        type: 'category',
+                        tickangle: 90,
+                        tickfont: {
+                            size: 6
+                        }
+                    },
+                    yaxis: { 
+                        title: '股價',
+                        domain: [0.3, 1],
+                        tickformat: '.2f',
+                        autorange: true
+                    },
+                    yaxis2: {
+                        title: 'MACD',
+                        domain: [0, 0.25],
+                        showgrid: true
+                    },
+                    showlegend: true,
+                    shapes: gridLines.map(price => ({
+                        type: 'line',
+                        yref: 'y',
+                        y0: price,
+                        y1: price,
+                        xref: 'paper',
+                        x0: 0,
+                        x1: 1,
+                        line: {
+                            color: price === baselinePrice ? 'rgba(255, 0, 0, 0.8)' : 'rgba(0, 0, 0, 0.2)',
+                            width: 1,
+                            dash: 'dash'
+                        }
+                    })),
+                    grid: {
+                        rows: 2,
+                        columns: 1,
+                        pattern: 'independent',
+                        roworder: 'top to bottom'
+                    }
+                };
+
+                console.log('開始繪製圖表...');
+                Plotly.newPlot(chartContainer, traces, layout);
+                console.log('圖表繪製完成');
+
+            } catch (error) {
+                console.error('showGridChart 錯誤:', error);
+                errorMessage.textContent = '獲取或繪製圖表失敗：' + error.message;
+                errorMessage.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+
+function toggleReverseKLine() {
+    isReversed = !isReversed; // 切換反轉狀態
+    const klineBtn = document.getElementById('kline-btn');
+    klineBtn.textContent = `K線圖 (${isReversed ? '反轉' : '正常'})`; // 更新按鈕文字
+    showKLineChart(); // 重新繪製 K 線圖
+}
+
+
+/**
+ * 將股號帶入查詢框並自動執行查詢
+ * @param {string} symbol - 股票代碼或名稱。
+ */
+function selectWatchlistSymbol(symbol) {
+    // 1. 將股號填入輸入框
+    document.getElementById('symbol').value = symbol;
+    
+    // 2. 隱藏口袋名單區塊 (可選)
+    document.getElementById('watchlist-container').style.display = 'none';
+    
+    // 3. (可選) 自動觸發查詢
+    // showTrendChart(); 
+    // 備註：如果您希望點擊後自動繪製圖表，請取消註解上方一行。
+    //      若想讓使用者自己按「查詢走勢圖」，則保持註解。
+}
+
+
+// 全域變數：口袋名單的儲存和狀態
+let watchlist = JSON.parse(localStorage.getItem('stockWatchlist')) || [];
+// 【修正 1】將偵測天數從 30 天改為 90 天
+const WATCHLIST_CHECK_DAYS = 90; 
+
+// 儲存名單到瀏覽器
+function saveWatchlist() {
+    localStorage.setItem('stockWatchlist', JSON.stringify(watchlist));
+}
+
+// 渲染口袋名單到介面
+function renderWatchlist() {
+    const listElement = document.getElementById('watchlist-list');
+    if (!listElement) return;
+
+    listElement.innerHTML = '';
+    
+    if (watchlist.length === 0) {
+        listElement.innerHTML = '<li class="list-group-item text-muted">名單是空的，請新增股號。</li>';
+        return;
+    }
+
+    watchlist.forEach(item => {
+        const listItem = document.createElement('li');
+        listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+        
+        // 顯示股號和狀態
+        let statusText = '';
+        if (item.status === 'DETECTED') {
+            statusText = '<span class="badge bg-primary ms-2">追蹤</span>'; 
+        } else if (item.status === 'CHECKED') {
+            statusText = '<span class="badge bg-success ms-2">✓ 狀態正常</span>'; 
+        } else if (item.status === 'ERROR') {
+            statusText = '<span class="badge bg-warning ms-2">查無資料</span>';
+        } else {
+             statusText = '<span class="badge bg-secondary ms-2">待檢查</span>';
+        }
+        
+        listItem.innerHTML = `
+            <div>
+                <a href="#" class="text-decoration-none" onclick="selectWatchlistSymbol('${item.symbol}'); return false;">
+                    <strong>${item.symbol}</strong>
+                </a>
+                ${statusText}
+            </div>
+            <div>
+                <button class="btn btn-sm btn-outline-danger" onclick="removeSymbolFromWatchlist('${item.symbol}')">刪除</button>
+            </div>
+        `;
+        listElement.appendChild(listItem);
+    });
+}
+
+
+
+// 新增股號
+async function addSymbolToWatchlist() {
+    const inputElement = document.getElementById('new-watchlist-symbol');
+    const rawSymbol = inputElement.value.trim().toUpperCase();
+    if (!rawSymbol) return;
+
+    // 檢查是否已存在
+    if (watchlist.some(item => item.symbol === rawSymbol)) {
+        alert(`${rawSymbol} 已在名單中。`);
+        return;
+    }
+    
+    // 預先檢查股號有效性 (可選，但推薦保留)
+    const resolved = await resolveSymbol(rawSymbol);
+    if (!resolved) {
+        alert(`無法解析股號: ${rawSymbol}`);
+        return;
+    }
+
+    watchlist.push({ symbol: rawSymbol, status: 'NEW' });
+    inputElement.value = '';
+    saveWatchlist();
+    renderWatchlist();
+}
+
+// 刪除股號
+function removeSymbolFromWatchlist(symbol) {
+    watchlist = watchlist.filter(item => item.symbol !== symbol);
+    saveWatchlist();
+    renderWatchlist();
+}
+
+// 顯示/隱藏口袋名單
+function toggleWatchlist() {
+    const container = document.getElementById('watchlist-container');
+    if (container.style.display === 'none') {
+        container.style.display = 'block';
+        renderWatchlist(); // 每次打開時重新渲染
+    } else {
+        container.style.display = 'none';
+    }
+}
+
+
+// =========================================================
+// 核心功能：偵測狀態（檢查近 90 天是否曾出現透明紅區塊條件）
+// =========================================================
+
+/**
+ * 檢查單一個股在近 WATCHLIST_CHECK_DAYS (90) 天內是否收盤價曾跌破布林下軌。
+ * @param {string} symbol - 股票代碼或名稱。
+ * @returns {boolean} - 是否偵測到條件。
+ */
+async function checkSingleSymbolForLowerBandBreak(symbol) {
+    try {
+        const today = new Date();
+        const endDate = today.toISOString().split('T')[0];
+        const startDate = new Date(today);
+        // 使用修正後的 WATCHLIST_CHECK_DAYS = 90
+        startDate.setDate(today.getDate() - WATCHLIST_CHECK_DAYS); 
+        const startDateStr = startDate.toISOString().split('T')[0];
+
+        const resolvedSymbol = await resolveSymbol(symbol);
+        if (!resolvedSymbol) return false;
+
+        const url = `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockPrice&data_id=${resolvedSymbol}&start_date=${startDateStr}&end_date=${endDate}`;
+        const response = await fetch(url);
+        const result = await response.json();
+        
+        // 需要足夠的數據計算 BB (一般為 20 根 K 線，90 天數據足夠)
+        if (!result.data || result.data.length < 20) return false; 
+
+        const prices = result.data.map(item => parseFloat(item.close));
+
+        // 確保 calculateBollinger 函數在全域可存取
+        const bollingerData = calculateBollinger(prices, 20, 2); 
+        const lowerBand = bollingerData.lowerBand;
+
+        for (let i = 0; i < prices.length; i++) {
+            const close = prices[i];
+            const lower = lowerBand[i];
+            
+            // 偵測條件：收盤價 < 布林下軌 (透明紅區塊條件)
+            if (close !== null && lower !== null && close < lower) {
+                return true; // 偵測到，立即返回
+            }
+        }
+        return false;
+    } catch (error) {
+        console.error(`檢查 ${symbol} 狀態時發生錯誤:`, error);
+        return false; // 發生錯誤視為未偵測到
+    }
+}
+
+// 檢查所有名單中的股號狀態
+async function checkAllWatchlistStatus() {
+    const masterButton = document.querySelector('#watchlist-container .btn-warning');
+    masterButton.textContent = '檢查中...請稍候';
+    masterButton.disabled = true;
+
+    // 清除所有現有狀態，避免因 API 失敗導致鎖定
+    watchlist = watchlist.map(item => ({...item, status: 'NEW'}));
+
+    for (let i = 0; i < watchlist.length; i++) {
+        const item = watchlist[i];
+        
+        const isDetected = await checkSingleSymbolForLowerBandBreak(item.symbol);
+        
+        if (isDetected) {
+            item.status = 'DETECTED'; // 條件達成，標示為藍色【追蹤】
+        } else {
+             item.status = 'CHECKED'; // 條件未達成，標示為綠色【正常】
+        }
+        // 每次檢查完更新一次介面 (即時回饋)
+        renderWatchlist();
+    }
+    
+    saveWatchlist(); // 儲存最終狀態
+    masterButton.textContent = '檢查所有股號狀態';
+    masterButton.disabled = false;
+    alert('口袋名單狀態檢查完成！');
+}
+
+// 備註：請確保您的 resolveSymbol, calculateMA, calculateBollinger 等輔助函數也是全域可存取的。
+
+
+
+
+
+
+async function showTrendChart() {
+    let symbol = document.getElementById('symbol').value;
+    const chartContainer = document.getElementById('chart-container');
+    const loading = document.getElementById('loading');
+    const errorMessage = document.getElementById('error-message');
+
+    if (!symbol) {
+        alert('請輸入股票代碼或公司名稱！');
+        return;
+    }
+
+    symbol = await resolveSymbol(symbol);
+    if (!symbol) {
+        alert('無法找到對應的股票代碼，請檢查輸入！');
+        return;
+    }
+
+    loading.style.display = 'block';
+    errorMessage.style.display = 'none';
+    chartContainer.style.display = 'block';
+    chartContainer.innerHTML = '<button class="close-chart-btn" onclick="closeChart()">關閉圖表</button>';
+
+    try {
+        const today = new Date();
+        const endDate = today.toISOString().split('T')[0];
+        const gridDays = parseInt(document.getElementById('gridDays').value) || 90;
+        const startDate = new Date(today);
+        startDate.setDate(today.getDate() - gridDays);
+        const startDateStr = startDate.toISOString().split('T')[0];
+
+        const stockUrl = `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockPrice&data_id=${symbol}&start_date=${startDateStr}&end_date=${endDate}`;
+        const taiexUrl = `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockPrice&data_id=TAIEX&start_date=${startDateStr}&end_date=${endDate}`;
+
+        const [stockResponse, taiexResponse] = await Promise.all([
+            fetch(stockUrl),
+            fetch(taiexUrl)
+        ]);
+
+        const [stockResult, taiexResult] = await Promise.all([
+            stockResponse.json(),
+            taiexResponse.json()
+        ]);
+
+        if (!stockResult.data || stockResult.data.length === 0) {
+            throw new Error('無法獲取個股數據');
+        }
+        if (!taiexResult.data || taiexResult.data.length === 0) {
+            throw new Error('無法獲取台股加權指數數據');
+        }
+
+        const stockData = stockResult.data;
+        const taiexData = taiexResult.data;
+
+        const filteredStockData = stockData.filter(item => parseFloat(item.Trading_Volume) > 0);
+        const dates = filteredStockData.map(item => {
+            const date = new Date(item.date);
+            return `${date.getMonth() + 1}/${date.getDate()}\n${date.getFullYear().toString().slice(-2)}`;
+        });
+        const prices = filteredStockData.map(item => parseFloat(item.close));
+        const volumes = filteredStockData.map(item => parseFloat(item.Trading_Volume));
+        const highs = filteredStockData.map(item => parseFloat(item.max));
+        const lows = filteredStockData.map(item => parseFloat(item.min));
+
+        const taiexDates = taiexData.map(item => {
+            const date = new Date(item.date);
+            return `${date.getMonth() + 1}/${date.getDate()}\n${date.getFullYear().toString().slice(-2)}`;
+        });
+        const taiexPricesRaw = taiexData.map(item => parseFloat(item.close));
+
+        const stockMin = Math.min(...prices);
+        const stockMax = Math.max(...prices);
+        const stockRange = stockMax - stockMin;
+        const taiexMin = Math.min(...taiexPricesRaw);
+        const taiexMax = Math.max(...taiexPricesRaw);
+        const taiexRange = taiexMax - taiexMin;
+        const taiexPrices = taiexPricesRaw.map(price => {
+            if (taiexRange === 0) return stockMin;
+            const normalized = (price - taiexMin) / taiexRange;
+            return stockMin + normalized * stockRange;
+        });
+
+        const maxPrice = stockMax;
+        const baselinePrice = maxPrice;
+
+        const gridLines = [];
+        for (let i = -5; i <= 5; i++) {
+            const gridPrice = baselinePrice * (1 + i * 0.05);
+            if (gridPrice > 0 && gridPrice <= baselinePrice * 1.10) {
+                gridLines.push(gridPrice);
+            }
+        }
+
+        const ma5 = calculateMA(prices, 5);
+        const ma9 = calculateMA(prices, 9);
+        const ma16 = calculateMA(prices, 16);
+        const volumeMA5 = calculateMA(volumes, 5);
+        // 檢測「5MA上方」條件
+        const above5MAPoints = detectAbove5MA(prices, ma5);
+        // 檢測「5MA下方」條件
+        const below5MAPoints = detectBelow5MA(prices, ma5);
+
+
+        const macdData = calculateMACD(prices);
+        const kdjData = calculateKDJForGrid(filteredStockData);
+        const jBelow21Points = kdjData.jPoints.filter(point => point.value < 21);
+
+        const crossPoints = [];
+        for (let i = 1; i < macdData.macdLine.length; i++) {
+            const prevDiff = macdData.macdLine[i-1] - macdData.signalLine[i-1];
+            const currDiff = macdData.macdLine[i] - macdData.signalLine[i];
+            if (prevDiff <= 0 && currDiff > 0) {
+                crossPoints.push(i);
+            }
+        }
+
+        const goldenCrossPoints = [];
+        for (let i = 1; i < prices.length; i++) {
+            if (prices[i-1] < ma16[i-1] && prices[i] > ma16[i]) {
+                goldenCrossPoints.push(i);
+            }
+        }
+
+        const sarValues = calculateSAR(filteredStockData);
+
+        const latestClose = prices[prices.length - 1];
+        const latestMA5 = ma5[ma5.length - 1];
+        const latestMA16 = ma16[ma16.length - 1];
+
+        // 計算布林通道
+        const bollingerData = calculateBollinger(prices, 20, 2);
+        const latestBollingerMid = bollingerData.ma[bollingerData.ma.length - 1];
+        const formattedLatestBollingerMid = formatNumberWithCommas(latestBollingerMid || 0);
+
+        // Nadaraya-Watson Envelope 計算指標，傳入 bollingerData
+        const h = 5; // Bandwidth
+        const mult = 0.6; // Multiplier
+        const nweData = calculateNWE(prices, h, mult, bollingerData);
+
+        const detectSwingBuyPoints = (data, prices, ma5, ma9, volumes, volumeMA5) => {
+            const buyPoints = [];
+            for (let i = 9; i < prices.length; i++) {
+                let score = 0;
+                const last9Days = prices.slice(i - 8, i + 1);
+                const is9DayHigh = prices[i] === Math.max(...last9Days);
+                if (is9DayHigh) score += 2;
+
+                const isVolumeRising = i >= 5 && volumeMA5[i] > volumeMA5[i-1] &&
+                    volumeMA5[i-1] > volumeMA5[i-2];
+                if (isVolumeRising) score += 2;
+
+                const isMAUptrend = i >= 2 && ma5[i] > ma5[i-1] &&
+                    ma5[i-1] > ma5[i-2] && ma9[i] > ma9[i-1];
+                if (isMAUptrend) score += 2;
+
+                const isVolumePattern = i >= 3 &&
+                    volumes[i-2] > volumes[i-1] &&
+                    volumes[i] > volumes[i-1] * 1.5 &&
+                    volumes[i] > volumes[i-2];
+                if (isVolumePattern) score += 3;
+
+                const isTripleBreak = i >= 3 &&
+                    prices[i] > Math.max(...highs.slice(i-3, i));
+                if (isTripleBreak) score += 2;
+
+                if (score >= 8) {
+                    buyPoints.push({
+                        index: i,
+                        price: prices[i],
+                        score: score
+                    });
+                }
+            }
+            return buyPoints;
+        };
+
+        const buyPoints = detectSwingBuyPoints(filteredStockData, prices, ma5, ma9, volumes, volumeMA5);
+        const latestLower = nweData.lower[nweData.lower.length - 1];
+        const formattedLatestLower = formatNumberWithCommas(latestLower || 0);
+
+
+        // 檢查最新收盤價是否小於等於下包絡線
+        let titleText = '股價走勢圖 (NWE + Bollinger Bands)';
+        if (latestClose <= latestLower) {
+            titleText = `<span style="color: yellow;">★</span> ${titleText}`;
+        }
+
+        // ====================================================================
+        // 【⭐修正點 A：新增偵測邏輯，生成透明紅區塊】
+        // ====================================================================
+        const lowerBandCrossShapes = [];
+        for (let i = 0; i < prices.length; i++) {
+            const close = prices[i];
+            const lowerBand = bollingerData.lowerBand[i];
+            
+            // 檢查條件：收盤價 < 布林下軌
+            if (close !== null && lowerBand !== null && parseFloat(close) < parseFloat(lowerBand)) {
+                lowerBandCrossShapes.push({
+                    type: 'rect',
+                    xref: 'x',
+                    yref: 'paper', // 關鍵：使用 paper 座標，參考整個圖表區域
+                    x0: i - 0.5, 
+                    x1: i + 0.5, 
+                    y0: 0,        // 關鍵：從圖表最底端 (MACD) 開始
+                    y1: 1,        // 關鍵：到圖表最頂端 (價格) 結束
+                    fillcolor: 'rgba(255, 0, 0, 0.3)', // 透明紅 (30% 不透明度)
+                    line: { width: 0 },
+                    layer: 'below' // 確保在所有線條下方
+                });
+            }
+        }
+        // ====================================================================
+
+
+        const traces = [
+            // ... (所有 Traces 保持不變) ...
+            {
+                x: taiexDates,
+                y: taiexPrices,
+                type: 'scatter',
+                mode: 'lines',
+                name: '台股加權指數趨勢',
+                line: { color: '#000000', width: 1 },
+                opacity: 0.5,
+                yaxis: 'y'
+            },
+            {
+                x: dates,
+                y: prices,
+                type: 'scatter',
+                mode: 'lines',
+                name: `收盤價 (${formatNumberWithCommas(latestClose)})`,
+                line: { color: '#FFCC22' }
+            },
+            {
+                x: dates,
+                y: ma5,
+                type: 'scatter',
+                mode: 'lines',
+                name: `5日均線 (${formatNumberWithCommas(latestMA5 || 0)})`,
+                line: { color: '#87CEFA' }
+            },
+            {
+                x: dates,
+                y: ma9,
+                type: 'scatter',
+                mode: 'lines',
+                name: '9日均線',
+                line: { color: '#E6E6FA' }
+            },
+            {
+                x: dates,
+                y: ma16,
+                type: 'scatter',
+                mode: 'lines',
+                name: `16日均線 (${formatNumberWithCommas(latestMA16 || 0)})`,
+                line: { color: '#FFB6C1' }
+            },
+            {
+                x: above5MAPoints.map(point => dates[point.index]),
+                y: above5MAPoints.map(point => point.price),
+                type: 'scatter',
+                mode: 'markers+text',
+                name: '5MA上方',
+                text: above5MAPoints.map(() => '◥'),
+                textposition: 'top',
+                marker: {
+                    symbol: 'triangle-up',
+                    size: 12,
+                    color: 'purple', // 紫色符號
+                    line: { width: 1, color: '#000000' }
+                },
+                showlegend: true
+            },
+
+            {
+                x: below5MAPoints.map(point => dates[point.index]),
+                y: below5MAPoints.map(point => point.price),
+                type: 'scatter',
+                mode: 'markers+text',
+                name: '5MA下方',
+                text: below5MAPoints.map(() => '⛛'),
+                textposition: 'bottom',
+                marker: {
+                    symbol: 'triangle-down',
+                    size: 12,
+                    color: 'black', // 青色符號
+                    line: { width: 1, color: '#0080FF' }
+                },
+                showlegend: true
+            },
+
+            {
+                x: dates,
+                y: nweData.nwe,
+                type: 'scatter',
+                mode: 'lines',
+                name: 'NWE',
+                line: { color: '#00CED1', width: 2 }
+            },
+            {
+                x: dates,
+                y: nweData.upper,
+                type: 'scatter',
+                mode: 'lines',
+                name: '上包絡線',
+                line: { color: '#00FF00', width: 1, dash: 'dash' }
+            },
+            {
+                x: dates.concat(dates.slice().reverse()),
+                y: nweData.upper.concat(nweData.lower.slice().reverse()),
+                type: 'scatter',
+                mode: 'lines',
+                fill: 'toself',
+                fillcolor: 'rgba(0, 191, 255, 0.05)', // 半透明藍色
+                line: {color: 'transparent'},
+                name: '包絡線區間',
+                showlegend: true,
+                hoverinfo: 'skip' // 不顯示hover提示
+            },
+            {
+                x: dates,
+                y: nweData.lower,
+                type: 'scatter',
+                mode: 'lines',
+                name: `下包絡線 (${formattedLatestLower})`,
+                line: { color: '#FF0000', width: 1, dash: 'dash' }
+            },
+            {
+                x: nweData.crossOverPoints.map(point => dates[point.index]),
+                y: nweData.crossOverPoints.map(point => prices[point.index]),
+                type: 'scatter',
+                mode: 'markers',
+                name: '穿越上包絡',
+                marker: {
+                    symbol: 'triangle-down',
+                    size: 12,
+                    color: '#00FFFF',
+                    line: { width: 1, color: '#000000' }
+                }
+            },
+            {
+                x: nweData.crossUnderPoints.map(point => dates[point.index]),
+                y: nweData.crossUnderPoints.map(point => prices[point.index]),
+                type: 'scatter',
+                mode: 'markers',
+                name: '穿越下包絡',
+                marker: {
+                    symbol: 'triangle-up',
+                    size: 12,
+                    color: '#ff00e6',
+                    line: { width: 1, color: '#000000' }
+                }
+            },
+            {
+                x: dates,
+                y: bollingerData.upperBand,
+                type: 'scatter',
+                mode: 'lines',
+                name: '布林上軌',
+                line: { color: 'rgba(0, 0, 255, 0.5)', width: 1, dash: 'dash' }
+            },
+            {
+                x: dates,
+                y: bollingerData.ma,
+                type: 'scatter',
+                mode: 'lines',
+                name: `布林中軌 (${formattedLatestBollingerMid})`,
+                line: { color: '#BF00FF', width: 1 }
+            },
+            {
+                x: dates,
+                y: bollingerData.lowerBand,
+                type: 'scatter',
+                mode: 'lines',
+                name: '布林下軌',
+                line: { color: 'rgba(0, 0, 255, 0.5)', width: 1, dash: 'dash' }
+            },
+            {
+                x: nweData.lowerCrossUnderBollingerPoints.map(point => dates[point.index]),
+                y: nweData.lowerCrossUnderBollingerPoints.map(point => point.value),
+                type: 'scatter',
+                mode: 'markers+text',
+                name: '空方走勢',
+                text: nweData.lowerCrossUnderBollingerPoints.map(() => '★'),
+                textposition: 'top',
+                marker: {
+                    symbol: 'star',
+                    size: 12,
+                    color: '#00FF00', // 綠色
+                    line: { width: 1, color: '#000000' }
+                },
+                showlegend: true
+            },
+            {
+                x: dates,
+                y: sarValues,
+                type: 'scatter',
+                mode: 'markers',
+                name: 'SAR拋物線',
+                marker: {
+                    color: '#FF4500',
+                    size: 6,
+                    symbol: 'circle'
+                }
+            },
+            {
+                x: goldenCrossPoints.map(i => dates[i]),
+                y: goldenCrossPoints.map(i => prices[i]),
+                type: 'scatter',
+                mode: 'markers',
+                name: '黃金交叉',
+                marker: {
+                    symbol: 'triangle-up',
+                    size: 12,
+                    color: '#FFFF00',
+                    line: { width: 1, color: '#000000' }
+                }
+            },
+            {
+                x: crossPoints.map(i => dates[i]),
+                y: crossPoints.map(i => prices[i]),
+                type: 'scatter',
+                mode: 'markers',
+                name: 'MACD交叉點',
+                marker: {
+                    symbol: 'triangle-down',
+                    size: 12,
+                    color: '#0000FF'
+                }
+            },
+            {
+                x: jBelow21Points.map(point => dates[point.index]),
+                y: jBelow21Points.map(point => prices[point.index]),
+                type: 'scatter',
+                mode: 'markers',
+                name: 'J值<21',
+                marker: {
+                    symbol: 'triangle-up',
+                    size: 12,
+                    color: '#00FF00',
+                    line: { width: 1, color: '#000000' }
+                }
+            },
+            {
+                x: buyPoints.map(point => dates[point.index]),
+                y: buyPoints.map(point => point.price),
+                type: 'scatter',
+                mode: 'markers',
+                name: '波段賣點(看區間外)',
+                marker: {
+                    symbol: 'triangle-up',
+                    size: 12,
+                    color: '#FF0000',
+                    line: { width: 1, color: '#000000' }
+                },
+                text: buyPoints.map(point => `得分: ${point.score}`),
+                textposition: 'top'
+            },
+            {
+                x: dates,
+                y: macdData.macdLine,
+                type: 'scatter',
+                mode: 'lines',
+                name: 'MACD',
+                line: { color: '#00F' },
+                yaxis: 'y2'
+            },
+            {
+                x: dates,
+                y: macdData.signalLine,
+                type: 'scatter',
+                mode: 'lines',
+                name: '信號線',
+                line: { color: '#F00' },
+                yaxis: 'y2'
+            },
+            {
+                x: dates,
+                y: macdData.histogram,
+                type: 'bar',
+                name: 'MACD柱狀',
+                marker: {
+                    color: macdData.histogram.map(v => v >= 0 ? '#FF0000' : '#00AA00')
+                },
+                yaxis: 'y2'
+            }
+        ];
+
+        const layout = {
+            title: {
+                text: titleText,
+                font: { size: 18 }
+            },
+            //動態生成標題 股價走勢圖 (NWE + Bollinger Bands)
+            xaxis: {
+                title: '日期',
+                domain: [0, 1],
+                type: 'category',
+                tickangle: 90,
+                tickfont: {
+                    size: 6
+                }
+            },
+            yaxis: {
+                title: '股價',
+                domain: [0.3, 1],
+                tickformat: '.2f',
+                autorange: true
+            },
+            yaxis2: {
+                title: 'MACD',
+                domain: [0, 0.25],
+                showgrid: true
+            },
+            showlegend: true,
+            // ====================================================================
+            // 【⭐修正點 B：合併原有的網格線和新增的透明紅區塊】
+            // ====================================================================
+            shapes: [
+                // 1. 原有的網格線 (來自 gridLines 陣列)
+                ...gridLines.map(price => ({
+                    type: 'line',
+                    yref: 'y',
+                    y0: price,
+                    y1: price,
+                    xref: 'paper',
+                    x0: 0,
+                    x1: 1,
+                    line: {
+                        color: price === baselinePrice ? 'rgba(255, 0, 0, 0.8)' : 'rgba(0, 0, 0, 0.2)',
+                        width: 1,
+                        dash: 'dash'
+                    }
+                })),
+                // 2. 新增的布林下軌穿越透明紅區塊
+                ...lowerBandCrossShapes 
+            ],
+            // ====================================================================
+            grid: {
+                rows: 2,
+                columns: 1,
+                pattern: 'independent',
+                roworder: 'top to bottom'
+            }
+        };
+
+        Plotly.newPlot(chartContainer, traces, layout);
+
+    } catch (error) {
+        console.error('showTrendChart 錯誤:', error);
+        errorMessage.textContent = '獲取或繪製圖表失敗：' + error.message;
+        errorMessage.style.display = 'block';
+    } finally {
+        loading.style.display = 'none';
+    }
+}
+
+
+
+        function calculateMA(prices, period) {
+            const ma = [];
+            for (let i = 0; i < prices.length; i++) {
+                if (i < period - 1) {
+                    ma.push(null);
+                } else {
+                    const sum = prices.slice(i - period + 1, i + 1).reduce((a, b) => a + b, 0);
+                    ma.push(sum / period);
+                }
+            }
+            return ma;
+        }
+
+        function calculateMACD(prices) {
+            const calculateEMA = (data, period) => {
+                const k = 2 / (period + 1);
+                const ema = [];
+                let prevEMA = data[0];
+                
+                for (let i = 0; i < data.length; i++) {
+                    if (i === 0) {
+                        ema.push(data[0]);
+                    } else {
+                        prevEMA = (data[i] - prevEMA) * k + prevEMA;
+                        ema.push(prevEMA);
+                    }
+                }
+                return ema;
+            };
+
+            const ema12 = calculateEMA(prices, 12);
+            const ema26 = calculateEMA(prices, 26);
+            const macdLine = ema12.map((v, i) => v - ema26[i]);
+            const signalLine = calculateEMA(macdLine, 9);
+            const histogram = macdLine.map((v, i) => v - signalLine[i]);
+
+            return { macdLine, signalLine, histogram };
+        }
+
+        function calculateKDJForGrid(data) {
+            const period = 9;
+            const kValues = [];
+            const dValues = [];
+            const jValues = [];
+            const jPoints = [];
+
+            for (let i = 0; i < data.length; i++) {
+                if (i < period - 1) {
+                    kValues.push(50);
+                    dValues.push(50);
+                    jValues.push(50);
+                    jPoints.push({ index: i, value: 50 });
+                    continue;
+                }
+
+                const periodHigh = Math.max(...data.slice(i - period + 1, i + 1).map(d => parseFloat(d.max)));
+                const periodLow = Math.min(...data.slice(i - period + 1, i + 1).map(d => parseFloat(d.min)));
+                const close = parseFloat(data[i].close);
+
+                const rsv = ((close - periodLow) / (periodHigh - periodLow)) * 100;
+                const k = i === period - 1 ? rsv : (2 / 3) * kValues[i - 1] + (1 / 3) * rsv;
+                const d = i === period - 1 ? k : (2 / 3) * dValues[i - 1] + (1 / 3) * k;
+                const j = 3 * d - 2 * k;
+
+                kValues.push(k);
+                dValues.push(d);
+                jValues.push(j);
+                jPoints.push({ index: i, value: j });
+            }
+
+            return {
+                k: kValues,
+                d: dValues,
+                j: jValues,
+                jPoints: jPoints
+            };
+        }
+
+        function calculateSAR(data) {
+            const af = 0.02;
+            const maxAf = 0.2;
+            const sarValues = [];
+            let isUpTrend = true;
+            let ep = parseFloat(data[0].max);
+            let sar = parseFloat(data[0].min);
+            let currentAf = af;
+
+            for (let i = 0; i < data.length; i++) {
+                const high = parseFloat(data[i].max);
+                const low = parseFloat(data[i].min);
+
+                if (isUpTrend) {
+                    if (high > ep) {
+                        ep = high;
+                        currentAf = Math.min(currentAf + af, maxAf);
+                    }
+                    sar = sar + currentAf * (ep - sar);
+                    if (low < sar) {
+                        isUpTrend = false;
+                        sar = ep;
+                        ep = low;
+                        currentAf = af;
+                    }
+                } else {
+                    if (low < ep) {
+                        ep = low;
+                        currentAf = Math.min(currentAf + af, maxAf);
+                    }
+                    sar = sar + currentAf * (ep - sar);
+                    if (high > sar) {
+                        isUpTrend = true;
+                        sar = ep;
+                        ep = high;
+                        currentAf = af;
+                    }
+                }
+                sarValues.push(sar);
+            }
+            return sarValues;
+        }
+
+ function calculateNWE(prices, h, mult, bollingerData) {
+    const nwe = [];
+    const upper = [];
+    const lower = [];
+    const crossOverPoints = [];
+    const crossUnderPoints = [];
+    const lowerCrossUnderBollingerPoints = [];
+
+    // 高斯核函數
+    const gauss = (x, h) => Math.exp(-(Math.pow(x, 2) / (h * h * 2)));
+
+    // 計算 NWE
+    for (let i = 0; i < prices.length; i++) {
+        let sum = 0;
+        let sumw = 0;
+        let sae = 0;
+        let nweValue;
+
+        // 計算加權平均
+        for (let j = 0; j < prices.length; j++) {
+            const w = gauss(i - j, h);
+            sum += prices[j] * w;
+            sumw += w;
+        }
+        nweValue = sum / sumw;
+        nwe.push(nweValue);
+
+        // 計算 MAE
+        for (let j = 0; j < prices.length; j++) {
+            sae += Math.abs(prices[j] - nweValue);
+        }
+        sae = (sae / prices.length) * mult;
+
+        upper.push(nweValue + sae);
+        lower.push(nweValue - sae);
+
+        // 檢測穿越點
+        if (i > 0) {
+            if (prices[i-1] < upper[i-1] && prices[i] > upper[i]) {
+                crossOverPoints.push({ index: i, value: prices[i] });
+            }
+            if (prices[i-1] > lower[i-1] && prices[i] < lower[i]) {
+                crossUnderPoints.push({ index: i, value: prices[i] });
+            }
+
+            // 檢測下包絡線從上而下穿越布林下軌，添加防護檢查
+            if (bollingerData && bollingerData.lowerBand && bollingerData.lowerBand[i] !== null && bollingerData.lowerBand[i-1] !== null) {
+                const prevLower = lower[i-1];
+                const currLower = lower[i];
+                const prevBollingerLower = bollingerData.lowerBand[i-1];
+                const currBollingerLower = bollingerData.lowerBand[i];
+                if (prevLower > prevBollingerLower && currLower <= currBollingerLower) {
+                    lowerCrossUnderBollingerPoints.push({ index: i, value: prices[i] });
+                }
+            }
+        }
+    }
+
+    return {
+        nwe: nwe,
+        upper: upper,
+        lower: lower,
+        crossOverPoints: crossOverPoints,
+        crossUnderPoints: crossUnderPoints,
+        lowerCrossUnderBollingerPoints: lowerCrossUnderBollingerPoints
+    };
+}
+
+
+
+function detectAbove5MA(prices, ma5) {
+    const above5MAPoints = [];
+    for (let i = 5; i < prices.length; i++) { // 從第5天開始，因為需要前5天的數據
+        const currentClose = prices[i];
+        const currentMA5 = ma5[i];
+        // 檢查當前收盤價是否大於5日均線
+        if (currentClose > currentMA5) {
+            // 檢查前五天收盤價是否都小於各自的5日均線
+            let allBelow = true;
+            for (let j = 1; j <= 5; j++) {
+                if (prices[i - j] >= ma5[i - j]) {
+                    allBelow = false;
+                    break;
+                }
+            }
+            if (allBelow) {
+                above5MAPoints.push({
+                    index: i,
+                    price: currentClose
+                });
+            }
+        }
+    }
+    return above5MAPoints;
+}
+
+
+function detectBelow5MA(prices, ma5) {
+    const below5MAPoints = [];
+    for (let i = 3; i < prices.length; i++) { // 從第3天開始，因為需要前3天的數據
+        const currentClose = prices[i];
+        const currentMA5 = ma5[i];
+        // 檢查當前收盤價是否小於5日均線
+        if (currentClose < currentMA5) {
+            // 檢查前3天收盤價是否都大於各自的5日均線
+            let allAbove = true;
+            for (let j = 1; j <= 3; j++) {
+                if (prices[i - j] <= ma5[i - j]) {
+                    allAbove = false;
+                    break;
+                }
+            }
+            if (allAbove) {
+                below5MAPoints.push({
+                    index: i,
+                    price: currentClose
+                });
+            }
+        }
+    }
+    return below5MAPoints;
+}
+
+
+
+function calculateBollinger(prices, period = 20, multiplier = 2) {
+    const ma = calculateMA(prices, period);
+    const upperBand = [];
+    const lowerBand = [];
+
+    // 確保 prices 數據有效
+    if (!prices || prices.length < period) {
+        console.warn('價格數據不足以計算布林通道');
+        return { ma: Array(prices.length).fill(null), upperBand: Array(prices.length).fill(null), lowerBand: Array(prices.length).fill(null) };
+    }
+
+    for (let i = 0; i < prices.length; i++) {
+        if (i < period - 1) {
+            upperBand.push(null);
+            lowerBand.push(null);
+            continue;
+        }
+
+        const slice = prices.slice(i - period + 1, i + 1);
+        const sum = slice.reduce((a, b) => a + Math.pow(b - ma[i], 2), 0);
+        const std = Math.sqrt(sum / period);
+        upperBand.push(ma[i] + multiplier * std);
+        lowerBand.push(ma[i] - multiplier * std);
+    }
+
+    return { ma, upperBand, lowerBand };
+}
+
+function closeChart() {
+            const chartContainer = document.getElementById('chart-container');
+            chartContainer.style.display = 'none';
+            chartContainer.innerHTML = '<button class="close-chart-btn" onclick="closeChart()">關閉圖表</button>';
+        }
+
+
+        // 股票平均價計算機功能
+        function showAveragePriceCalculator() {
+            avgTransactions = []; // 重置交易紀錄
+            document.getElementById('avg-price-entries').innerHTML = '';
+            document.getElementById('avg-price-result').innerHTML = '';
+            document.getElementById('avg-price').value = '';
+            document.getElementById('avg-shares').value = '';
+	    document.getElementById('current-close-price').value = ''; // 重置收盤價
+            const modal = new bootstrap.Modal(document.getElementById('avgPriceModal'));
+            modal.show();
+        }
+
+function addAvgEntry() {
+    const price = parseFloat(document.getElementById('avg-price').value);
+    const shares = parseInt(document.getElementById('avg-shares').value);
+
+    if (isNaN(price) || isNaN(shares) || price <= 0 || shares <= 0) {
+        alert('請輸入有效的價格和股數！');
+        return;
+    }
+
+    avgTransactions.push({ price, shares });
+
+    // 重新渲染所有條目，避免索引問題
+    renderEntries();
+
+    document.getElementById('avg-price').value = '';
+    document.getElementById('avg-shares').value = '';
+    calculateAvgPrice(); // 每次新增後自動計算
+}
+
+function renderEntries() {
+    const entriesContainer = document.getElementById('avg-price-entries');
+    entriesContainer.innerHTML = ''; // 清空現有條目
+
+    avgTransactions.forEach((trans, index) => {
+        const entryDiv = document.createElement('div');
+        entryDiv.className = 'avg-price-input-group';
+        entryDiv.innerHTML = `
+            <span>價格: ${trans.price.toFixed(2)}</span>
+            <span style="margin-left: 10px;">股數: ${trans.shares}</span>
+            <button class="btn btn-danger btn-sm" style="margin-left: 10px;" onclick="removeAvgEntry(this, ${index})">移除</button>
+        `;
+        entriesContainer.appendChild(entryDiv);
+    });
+}
+
+
+function removeAvgEntry(button, index) {
+    avgTransactions.splice(index, 1); // 從陣列中移除指定索引的資料
+    renderEntries(); // 重新渲染所有條目
+    calculateAvgPrice(); // 重新計算
+}
+
+ // 修改 calculateAvgPrice 函數
+function calculateAvgPrice() {
+    if (avgTransactions.length === 0) {
+        document.getElementById('avg-price-result').innerHTML = '請先新增交易紀錄！';
+        return;
+    }
+
+    const totalCost = avgTransactions.reduce((sum, trans) => sum + trans.price * trans.shares, 0);
+    const totalShares = avgTransactions.reduce((sum, trans) => sum + trans.shares, 0);
+    const avgPrice = totalCost / totalShares;
+    const currentClosePrice = parseFloat(document.getElementById('current-close-price').value) || 0;
+
+    let resultHTML = `
+        <br><br>
+        平均股價: ${avgPrice.toFixed(2)} 元<br>
+        總股數: ${totalShares} 股<br><br>
+        總成本: ${totalCost.toFixed(2)} 元
+    `;
+
+    if (currentClosePrice > 0) {
+        const currentValue = currentClosePrice * totalShares;
+        const profitLoss = currentValue - totalCost;
+        const returnRate = (profitLoss / totalCost) * 100;
+
+        resultHTML += `
+            <br><br>
+            當前收盤價: ${currentClosePrice.toFixed(2)} 元<br>
+            當前總市值: ${currentValue.toFixed(2)} 元<br>
+            未實現損益: ${profitLoss.toFixed(2)} 元<br>
+            報酬率: ${returnRate.toFixed(2)}%
+        `;
+    }
+
+    document.getElementById('avg-price-result').innerHTML = resultHTML;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        fetchData();
+    }
+});
+
+function showRealTimeChart() {
+    let symbol = document.getElementById('symbol').value;
+    if (symbol) {
+        resolveSymbol(symbol).then(resolvedSymbol => {
+            if (resolvedSymbol) {
+                window.open(`http://tw.stock.yahoo.com/q/bc?s=${resolvedSymbol}`, '_blank');
+            } else {
+                alert('無法找到對應的股票代碼，請檢查輸入！');
+            }
+        });
+    } else {
+        alert('請先輸入股票代碼或公司名稱');
+    }
+}
+
+function showIndustryInfo() {
+    let symbol = document.getElementById('symbol').value;
+    if (symbol) {
+        resolveSymbol(symbol).then(resolvedSymbol => {
+            if (resolvedSymbol) {
+                window.open(`https://www.wantgoo.com/stock/${resolvedSymbol}/company-profile`, '_blank');
+            } else {
+                alert('無法找到對應的股票代碼，請檢查輸入！');
+            }
+        });
+    } else {
+        alert('請先輸入股票代碼或公司名稱');
+    }
+}
+
+async function fetchFundamentalData(symbolOverride) {
+    let symbol = symbolOverride || document.getElementById('symbol').value;
+    const fundamentalData = document.getElementById('fundamental-data');
+    const errorMessage = document.getElementById('error-message');
+    
+    if (!symbol) {
+        errorMessage.textContent = '請輸入股票代碼或公司名稱！';
+        errorMessage.style.display = 'block';
+        return;
+    }
+
+    symbol = await resolveSymbol(symbol);
+    if (!symbol) {
+        errorMessage.textContent = '無法找到對應的股票代碼，請檢查輸入！';
+        errorMessage.style.display = 'block';
+        return;
+    }
+
+    try {
+        const today = new Date();
+        const endDate = today.toISOString().split('T')[0];
+        const startDate = new Date(today);
+        startDate.setDate(today.getDate() - 90);
+        const startDateStr = startDate.toISOString().split('T')[0];
+
+        const lastYearStartDate = new Date(today);
+        lastYearStartDate.setFullYear(today.getFullYear() - 1);
+        lastYearStartDate.setMonth(today.getMonth() - 3);
+        const lastYearStartDateStr = lastYearStartDate.toISOString().split('T')[0];
+
+        const priceUrl = `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockPrice&data_id=${symbol}&start_date=${startDateStr}&end_date=${endDate}`;
+        const peUrl = `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockPER&data_id=${symbol}&start_date=${startDateStr}&end_date=${endDate}`;
+        const revenueUrl = `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockMonthRevenue&data_id=${symbol}&start_date=${lastYearStartDateStr}`;
+
+        const [priceResponse, peResponse, revenueResponse] = await Promise.all([
+            fetch(priceUrl),
+            fetch(peUrl),
+            fetch(revenueUrl)
+        ]);
+
+        const [priceData, peData, revenueData] = await Promise.all([
+            priceResponse.json(),
+            peResponse.json(),
+            revenueResponse.json()
+        ]);
+
+        const prices = priceData.data || [];
+        document.getElementById('current-price').textContent = 
+            prices.length > 0 
+                ? `${formatNumberWithCommas(prices[prices.length - 1].close)} 元` 
+                : '無資料';
+
+        const peInfo = peData.data || [];
+        document.getElementById('pe-ratio').textContent = 
+            peInfo.length > 0 
+                ? `${peInfo[peInfo.length - 1].PER.toFixed(2)}` 
+                : '無資料';
+
+        document.getElementById('dividend-yield').textContent = 
+            peInfo.length > 0 
+                ? `${peInfo[peInfo.length - 1].dividend_yield.toFixed(2)}%` 
+                : '無資料';
+
+        const revenues = revenueData.data || [];
+        if (revenues.length >= 2) {
+            const latestRevenue = revenues[revenues.length - 1];
+            const latestRevenueInBillions = (latestRevenue.revenue / 100000000).toFixed(2);
+            document.getElementById('latest-revenue').textContent = `${latestRevenueInBillions} 億元`;
+
+            const previousRevenue = revenues[revenues.length - 2];
+            const previousRevenueInBillions = (previousRevenue.revenue / 100000000).toFixed(2);
+            document.getElementById('previous-revenue').textContent = `${previousRevenueInBillions} 億元`;
+
+            const latestMonth = new Date(latestRevenue.date);
+            const lastYearSameMonth = revenues.find(r => {
+                const rDate = new Date(r.date);
+                return rDate.getFullYear() === latestMonth.getFullYear() - 1 && 
+                       rDate.getMonth() === latestMonth.getMonth();
+            });
+            if (lastYearSameMonth) {
+                const lastYearRevenue = lastYearSameMonth.revenue;
+                const growthRate = ((latestRevenue.revenue - lastYearRevenue) / lastYearRevenue * 100).toFixed(2);
+                document.getElementById('revenue-growth-rate').textContent = `${growthRate}%`;
+            } else {
+                document.getElementById('revenue-growth-rate').textContent = '無去年同期資料';
+            }
+        } else if (revenues.length === 1) {
+            const latestRevenue = revenues[0];
+            const latestRevenueInBillions = (latestRevenue.revenue / 100000000).toFixed(2);
+            document.getElementById('latest-revenue').textContent = `${latestRevenueInBillions} 億元`;
+            document.getElementById('previous-revenue').textContent = '無資料';
+            document.getElementById('revenue-growth-rate').textContent = '無去年同期資料';
+        } else {
+            document.getElementById('latest-revenue').textContent = '無資料';
+            document.getElementById('previous-revenue').textContent = '無資料';
+            document.getElementById('revenue-growth-rate').textContent = '無資料';
+        }
+
+        fundamentalData.style.display = 'block';
+        errorMessage.style.display = 'none';
+
+    } catch (error) {
+        console.error('獲取基本面數據失敗：', error);
+        errorMessage.textContent = '獲取基本面數據時發生錯誤，請稍後再試。';
+        errorMessage.style.display = 'block';
+    }
+}
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
